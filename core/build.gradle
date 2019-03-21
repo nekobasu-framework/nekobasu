@@ -1,0 +1,52 @@
+apply from: '../config.gradle'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+def config = ext.configuration
+def libs = ext.libraries
+
+android {
+    compileSdkVersion config.targetSdkVersion
+
+
+    defaultConfig {
+        minSdkVersion config.minSdkVersion
+        targetSdkVersion config.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation "androidx.appcompat:appcompat:${libs.appCompat}"
+    implementation "androidx.lifecycle:lifecycle-runtime:${libs.architecture}"
+    implementation "androidx.lifecycle:lifecycle-extensions:${libs.architecture}"
+    kapt "androidx.lifecycle:lifecycle-compiler:${libs.architecture}"
+
+    implementation "androidx.transition:transition:${libs.transition}"
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlin_version}"
+
+    //Test
+    testImplementation "androidx.arch.core:core-testing:${libs.architecture}"
+    testImplementation "junit:junit:${libs.test.junit}"
+    testImplementation "androidx.test:rules:${libs.test.testXRules}"
+    testImplementation "androidx.test.ext:junit:${libs.test.testXJunit}"
+    testImplementation "com.nhaarman:mockito-kotlin-kt1.1:${libs.test.mockitoKotlin}"
+    testImplementation "org.mockito:mockito-inline:${libs.test.mockitoInline}"
+    testImplementation "com.natpryce:hamkrest:${libs.test.hamkrest}"
+    testImplementation "org.robolectric:robolectric:${libs.test.robolectric}"
+}

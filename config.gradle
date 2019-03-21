@@ -1,0 +1,24 @@
+ext {
+    configuration = [
+            minSdkVersion    : 21,
+            targetSdkVersion : 28
+    ]
+
+    libraries = [
+            // Android
+            architecture: '2.0.0',
+            constraint  : '1.1.2',
+            appCompat   : '1.0.2',
+            transition  : '1.0.1',
+
+            test        : [
+                    mockitoKotlin : '1.5.0',
+                    mockitoInline : '2.7.13',
+                    junit   : '4.12',
+                    hamkrest: '1.4.2.2',
+                    robolectric : '4.1',
+                    testXRules : '1.1.1',
+                    testXJunit : '1.1.0',
+            ]
+    ]
+}
