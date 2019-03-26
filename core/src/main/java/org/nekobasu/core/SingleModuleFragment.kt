@@ -11,10 +11,9 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 open class Param(val moduleClass: Class<out LifecycleUiModule<*,*,*>>) : Parcelable
 
-class SingleModuleFragment<P : Param> : Fragment(), BackPressHandling {
-
+class SingleModuleFragment<P : Param> : Fragment(), BackPressHandling, InterUiContract {
     companion object {
-        private val KEY_PARAMS = "params"
+        private const val KEY_PARAMS = "fragment_params"
 
         fun <P : Param> paramsFromFragment(fragment: Fragment): P = fragment.arguments!!.getParcelable(KEY_PARAMS) as P
         fun <P : Param> addParamsToFragment(fragment: Fragment, params: P) {
@@ -56,7 +55,15 @@ class SingleModuleFragment<P : Param> : Fragment(), BackPressHandling {
     }
 
     override fun onBackPress(): Boolean {
-        return if (mainUiModule is BackPressHandling) (mainUiModule as BackPressHandling).onBackPress() else false
+        return mainUiModule.onBackPress()
+    }
+
+    override fun deliverResult(result: RequestedResult) {
+        mainUiModule.deliverResult(result)
+    }
+
+    override fun updateParams(param: Parcelable) {
+        addParamsToFragment(this, param as P)
     }
 }
 

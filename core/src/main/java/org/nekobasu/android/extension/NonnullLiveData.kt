@@ -2,9 +2,13 @@ package org.nekobasu.android.extension
 
 import androidx.lifecycle.LiveData
 
-abstract class NonnullLiveData<T : Any>(private val initialValue : T) : LiveData<T>() {
+abstract class NonnullLiveData<T : Any>(initialValue : T) : LiveData<T>() {
+    init {
+        value = initialValue
+    }
+
     override fun getValue(): T {
-        return super.getValue() ?: initialValue
+        return super.getValue()!!
     }
 }
 

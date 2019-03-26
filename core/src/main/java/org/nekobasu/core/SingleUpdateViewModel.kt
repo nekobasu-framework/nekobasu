@@ -16,7 +16,7 @@ abstract class SingleUpdateViewModel<T : Any> : ViewModelContract<T>, ViewModel(
     }
 
     protected fun setViewUpdate(viewUpdate : T) {
-        (viewUpdateLiveData as MutualNonnullLiveData).value = viewUpdate
+        (viewUpdateLiveData as MutualNonnullLiveData).setValue(viewUpdate)
     }
 
     override fun observeViewUpdates(lifecycleOwner: LifecycleOwner?, observer: Observer<T>) {
@@ -36,7 +36,7 @@ abstract class SingleUpdateViewModel<T : Any> : ViewModelContract<T>, ViewModel(
 
     override fun clear() {}
 
-    override fun deliverResult(result: Result) {}
+    override fun deliverResult(result: RequestedResult) {}
 
     override fun onSave(outBundle: Bundle) {}
 

@@ -7,7 +7,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.*
 
 abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
-        UiContract<T, V, P>, InnerViewModelContract, BackPressHandling
+        UiContract<T, V, P>, InnerViewModelContract,
+        BackPressHandling
         where V : ViewModelContract<T>, V : ViewModel {
 
     fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner) {
@@ -34,7 +35,7 @@ abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
         // Default implementation that expects a params only constructor
         val constructor = getViewModelClass(params).constructors.first()
         @Suppress("UNCHECKED_CAST")
-        return constructor.newInstance(params) as V
+        return if (constructor.parameterCount == 1) constructor.newInstance(params) as V else constructor.newInstance() as V
     }
 
     override fun onRestore(inBundle: Bundle) {
@@ -51,5 +52,8 @@ abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
 
     abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     abstract fun onInitView(view: View, savedInstanceState: Bundle?)
+    override fun deliverResult(result: RequestedResult) {
+        viewModel.deliverResult(result)
+    }
 }
 
