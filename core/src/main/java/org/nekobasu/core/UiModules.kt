@@ -4,6 +4,6 @@ import androidx.fragment.app.Fragment
 
 object UiModules {
     fun <P : Param> fragmentFromModule(param: P): Fragment {
-        return SingleModuleFragment.newInstace(param)
+        return SingleModuleFragment.newInstance(param)
     }
 }

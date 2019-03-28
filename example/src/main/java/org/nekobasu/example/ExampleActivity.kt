@@ -28,7 +28,11 @@ class MainUiModule : ScreenStackFragmentModule<MainViewModel, MainParams>(MainPa
     override fun getViewModelClass(params: MainParams): Class<MainViewModel> = MainViewModel::class.java
 }
 
-class ExampleActivity : SingleModuleActivity<MainParams>(MainParams())
+class ExampleActivity : SingleModuleActivity() {
+    override fun getInitialParam(): Param? {
+        return MainParams()
+    }
+}
 class ExampleScreenParams : Param(ExampleModule::class.java)
 
 // TODO add lazy recource extension

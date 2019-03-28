@@ -22,8 +22,10 @@ abstract class ScreenStackViewModel : SingleUpdateViewModel<List<ScreenUpdate>>(
     private val screenIdCounter = AtomicInteger()
 
     // try to synchronize stack in it self
-    private val stack = Stack<ScreenUpdate>().apply {
-        push(getInitialScreen())
+    private val stack by lazy {
+        Stack<ScreenUpdate>().apply {
+            push(getInitialScreen())
+        }
     }
 
     override val initialViewUpdate: List<ScreenUpdate>

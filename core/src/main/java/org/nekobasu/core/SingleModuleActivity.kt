@@ -1,14 +1,44 @@
 package org.nekobasu.core
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentActivity
+import java.lang.IllegalStateException
 
-abstract class SingleModuleActivity<P : Param>(private val param: P) : FragmentActivity() {
+open class SingleModuleActivity : FragmentActivity() {
 
-    @Suppress("UNCHECKED_CAST")
-    private val mainUiModule: LifecycleUiModule<*, *, P> by lazy {
-        param.moduleClass.newInstance() as LifecycleUiModule<*, *, P>
+    companion object {
+        private const val KEY_PARAMS = "activity_params"
+
+        fun <P : Param> paramsFromActivity(activity: FragmentActivity): P? = activity.intent.getParcelableExtra(KEY_PARAMS) as? P
+        fun <P : Param> addParamsToActivityIntent(intent: Intent, params: P) : Intent {
+                intent.putExtra(KEY_PARAMS, params)
+                return intent
+        }
+
+    }
+
+    /**
+     * Override to be able to declare activities within the AndroidManifest, instead of using
+     * SingleModuleActivity.addParamsToActivityIntent(intent, param).
+     */
+    protected open fun getInitialParam() : Param? { return null }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val mainUiModule: LifecycleUiModule<*, *, *> by lazy {
+        val intentParam = paramsFromActivity<Param>(this)
+        val initialParam = getInitialParam()
+
+        when {
+            intentParam != null ->  intentParam
+            initialParam != null -> initialParam
+            else -> throw IllegalStateException("Initial and intent param is not set for SingleModuleActivity, " +
+                    "please override getInitialParam or start Activity with SingleModuleActivity.addParamsToActivityIntent")
+        }.let {
+            it.instanceWithParams()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -7,3 +7,4 @@ The nekobasu app framework for fast, stable, scalable and clean apps
 ## TODO Add service structure / like IntentServices
 ## TODO Add notification handling
 ## TODO Add toast and single update handling
+## TODO add lazy strings / resources

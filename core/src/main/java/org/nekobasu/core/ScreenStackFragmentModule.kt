@@ -39,6 +39,7 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
                     oldStack = oldScreenUpdateStack,
                     fragmentCreator = fragmentCreator)
         }
+        oldScreenUpdateStack = viewUpdate
     }
 
 
