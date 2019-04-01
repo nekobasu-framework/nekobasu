@@ -17,14 +17,13 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
         }
 ) : LifecycleUiModule<List<ScreenUpdate>, V, P>(param) {
 
-    override lateinit var context: FragmentActivity
+    private val acticityContext: FragmentActivity by lazy { context as FragmentActivity }
     private lateinit var fragmentManager: FragmentManager
     private var oldScreenUpdateStack: List<ScreenUpdate> = emptyList()
     private val taskTagsCache: MutableSet<String> = mutableSetOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        context = inflater.context as FragmentActivity
-        fragmentManager = context.supportFragmentManager
+        fragmentManager = acticityContext.supportFragmentManager
         return null
     }
 
@@ -32,7 +31,7 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
 
     override fun onViewUpdate(viewUpdate: List<ScreenUpdate>) {
         if (viewUpdate.isEmpty()) {
-            context.finish()
+            acticityContext.finish()
         } else {
             showFragments(
                     newStack = viewUpdate,

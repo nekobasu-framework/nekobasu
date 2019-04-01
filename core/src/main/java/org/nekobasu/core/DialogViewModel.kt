@@ -1,6 +1,13 @@
 package org.nekobasu.core
 
-inline class DialogId(val id : Int)
+import java.util.*
+
+inline class DialogId(val id : Int) {
+    companion object {
+        val random = Random()
+        fun nextId() = DialogId(random.nextInt())
+    }
+}
 
 inline class InteractionId(val id : Int)
 

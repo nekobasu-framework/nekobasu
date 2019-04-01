@@ -38,11 +38,11 @@ open class SingleModuleFragment : Fragment(), BackPressHandling, InterUiContract
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mainUiModule.attach(this.viewLifecycleOwner, this)
         savedInstanceState?.let { mainUiModule.onRestore(savedInstanceState) }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        mainUiModule.attach(this.viewLifecycleOwner, this, context!!)
         return mainUiModule.onCreateView(inflater, container, savedInstanceState)
     }
 

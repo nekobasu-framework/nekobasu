@@ -43,7 +43,7 @@ open class SingleModuleActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainUiModule.attach(this, this)
+        mainUiModule.attach(this, this, this)
         savedInstanceState?.let { mainUiModule.onRestore(savedInstanceState) }
         val view = mainUiModule.onCreateView(LayoutInflater.from(this), null, savedInstanceState)
         setContentView(view)

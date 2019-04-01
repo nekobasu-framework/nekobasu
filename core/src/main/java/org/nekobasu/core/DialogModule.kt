@@ -14,13 +14,13 @@ import androidx.lifecycle.OnLifecycleEvent
 private const val DIALOG_BUNDLE = "dialog_bundle"
 
 interface DialogViewCallback {
-    fun onRemove(dialogId: DialogId)
+    fun onCanceledByOutside(dialogId: DialogId)
     fun onInteractionPerformed(dialogId: DialogId, interactionId: InteractionId)
     fun onResult(dialogId: DialogId, dialogResult: DialogResult)
 }
 
 interface DialogCreator {
-    fun createDialog(dialogUpdate: DialogUpdateContract, savedOverlayState: Bundle? = null, callback: DialogViewCallback): Dialog
+    fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle? = null, callback: DialogViewCallback): Dialog
 }
 
 class DialogParam(val dialogCreatorClass: Class<DialogCreator>) : Param(DialogModule::class.java)
@@ -58,13 +58,13 @@ open class DialogModule(param: DialogParam) : LifecycleUiModule<DialogUpdateCont
     private fun showDialog(dialogUpdate: DialogUpdateContract) {
         val savedDialogBundle = savedInstanceState?.getBundle(DIALOG_BUNDLE)
 
-        val dialog = getDialogCreator().createDialog(dialogUpdate, savedDialogBundle, object : DialogViewCallback {
+        val dialog = getDialogCreator().createDialog(context, dialogUpdate, savedDialogBundle, object : DialogViewCallback {
             override fun onResult(dialogId: DialogId, dialogResult: DialogResult) {
                 dialogHandler.reset()
                 viewModel.onDialogResult(dialogId, dialogResult)
             }
 
-            override fun onRemove(dialogId: DialogId) {
+            override fun onCanceledByOutside(dialogId: DialogId) {
                 dialogHandler.reset()
                 viewModel.onDialogRemoved(dialogId)
             }

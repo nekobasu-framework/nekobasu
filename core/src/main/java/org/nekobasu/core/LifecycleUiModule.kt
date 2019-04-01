@@ -1,5 +1,6 @@
 package org.nekobasu.core
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,8 @@ abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
         BackPressHandling
         where V : ViewModelContract<T>, V : ViewModel {
 
-    fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner) {
+    fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner, context : Context) {
+        this.context = context
         provider = ViewModelProvider(viewModelStoreOwner, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")
@@ -25,17 +27,14 @@ abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
     }
 
     private lateinit var provider: ViewModelProvider
+    override lateinit var context: Context
 
-    final override val viewModel: V
-        get() {
-            return provider.get(getViewModelClass(params))
-        }
+    final override val viewModel: V by lazy { provider.get(getViewModelClass(params)) }
 
     override fun onCreateViewModel(params: P): V {
         // Default implementation that expects a params only constructor
         val constructor = getViewModelClass(params).constructors.first()
-        @Suppress("UNCHECKED_CAST")
-        return if (constructor.parameterCount == 1) constructor.newInstance(params) as V else constructor.newInstance() as V
+        return if (constructor.parameterTypes.size == 1) constructor.newInstance(params) as V else constructor.newInstance() as V
     }
 
     override fun onRestore(inBundle: Bundle) {
@@ -43,6 +42,7 @@ abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
     }
 
     override fun onSave(outBundle: Bundle) {
+        if (::provider.isInitialized)
         viewModel.onSave(outBundle)
     }
 
