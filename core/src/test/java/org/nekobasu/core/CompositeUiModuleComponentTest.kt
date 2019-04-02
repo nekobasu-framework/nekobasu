@@ -32,7 +32,7 @@ class CompositeUiModuleComponentTest : RobolectricTest() {
                 title = "Alert",
                 message = "A nice dialog",
                 positive = okInteraction()),
-                onAnyAction {
+                DialogCallbacks.onAnyAction {
 
                 })
     }

@@ -3,21 +3,21 @@ package org.nekobasu.core
 import org.nekobasu.dialogs.InteractionIds
 import java.util.*
 
-inline class DialogId(val id : Int) {
+inline class DialogId(val id: Int) {
     companion object {
         val random = Random()
         fun nextId() = DialogId(random.nextInt())
     }
 }
 
-inline class InteractionId(val id : Int)
+inline class InteractionId(val id: Int)
 
 val NoDialogId = DialogId(-1)
 
 interface DialogResult
 
 interface DialogUpdateContract {
-    val dialogId : DialogId
+    val dialogId: DialogId
 }
 
 interface DialogCallbackTarget {
@@ -50,6 +50,13 @@ class DialogCallbacks(
     override fun onDialogRemoved() = onRemoved()
     override fun onDialogInteractionPerformed(interactionId: InteractionId) = onInteractionPerformed(interactionId)
     override fun onDialogResult(dialogResult: DialogResult) = onResult(dialogResult)
+
+    companion object {
+        fun onOkAction(doOnOkPerformed: () -> Unit) = DialogCallbacks(onInteractionPerformed = { if (it == InteractionIds.POSITIVE) doOnOkPerformed() })
+        fun onAnyAction(doOnAnyPerformed: (interactionId: InteractionId) -> Unit) = DialogCallbacks(onInteractionPerformed = { doOnAnyPerformed(it) })
+        fun afterDialog(doAfterDialog: () -> Unit) = DialogCallbacks(onInteractionPerformed = { doAfterDialog() }, onResult = { doAfterDialog() }, onRemoved = { doAfterDialog() })
+        fun <T : DialogResult> onResult(doWithResult: (T) -> Unit) = DialogCallbacks(onResult = { doWithResult(it as T) })
+    }
 }
 
 object NoDialogCallback : DialogCallback {
@@ -58,13 +65,8 @@ object NoDialogCallback : DialogCallback {
     override fun onDialogResult(dialogResult: DialogResult) {}
 }
 
-fun onOkAction(doOnOkPerformed: () -> Unit) = DialogCallbacks(onInteractionPerformed = { if (it == InteractionIds.POSITIVE) doOnOkPerformed() })
-fun onAnyAction(doOnAnyPerformed: (interactionId: InteractionId) -> Unit) = DialogCallbacks(onInteractionPerformed = { doOnAnyPerformed(it) })
-fun afterDialog(doAfterDialog: () -> Unit) = DialogCallbacks(onInteractionPerformed = { doAfterDialog() }, onResult = { doAfterDialog() }, onRemoved = { doAfterDialog() })
-
 abstract class DialogUpdate(override val dialogId: DialogId) : DialogUpdateContract
 object NoDialog : DialogUpdate(NoDialogId)
-
 
 
 open class DialogViewModel : SingleUpdateViewModel<DialogUpdateContract>(), DialogCallbackTarget, DialogChannel {

@@ -10,11 +10,10 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 
-abstract class CompositeUiModule<T : Any, V, P>(param: P)
-    : LifecycleUiModule<T, V, P>(param)
+abstract class CompositeUiModule<T : Any, V, P>(param: P) : LifecycleUiModule<T, V, P>(param)
         where V : ViewModelContract<T>, V : ViewModel {
 
-    abstract val supportModules : Set<LifecycleUiModule<*, *, *>>
+    abstract val supportModules: Set<LifecycleUiModule<*, *, *>>
 
     private val supportModuleViews = mutableMapOf<LifecycleUiModule<*, *, *>, View?>()
 
@@ -26,13 +25,13 @@ abstract class CompositeUiModule<T : Any, V, P>(param: P)
 
     @CallSuper
     override fun onRestore(inBundle: Bundle) {
-        supportModules.forEach { onRestore(inBundle) }
+        supportModules.forEach { it.onRestore(inBundle) }
         super.onRestore(inBundle)
     }
 
     @CallSuper
     override fun onSave(outBundle: Bundle) {
-        supportModules.forEach { onSave(outBundle) }
+        supportModules.forEach { it.onSave(outBundle) }
         super.onSave(outBundle)
     }
 
@@ -42,7 +41,7 @@ abstract class CompositeUiModule<T : Any, V, P>(param: P)
         return onCreateView(inflater, container, savedInstanceState, supportModuleViews)
     }
 
-    abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?, moduleViews : Map<LifecycleUiModule<*, *, *>, View?>): View?
+    abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?, moduleViews: Map<LifecycleUiModule<*, *, *>, View?>): View?
 
     @CallSuper
     override fun onInitView(view: View, savedInstanceState: Bundle?) {

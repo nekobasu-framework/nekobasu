@@ -1,15 +1,19 @@
 package org.nekobasu.dialogs
 
+import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import org.nekobasu.core.*
 import java.lang.IllegalStateException
+import java.util.*
 
 data class DialogInteraction(val title: CharSequence, val interactionId: InteractionId)
+
 // TODO add lazy resources
 fun okInteraction() = DialogInteraction("OK", InteractionIds.POSITIVE)
+
 fun cancelInteraction() = DialogInteraction("Cancel", InteractionIds.NEGATIVE)
 
 object InteractionIds {
@@ -29,6 +33,13 @@ object Dialogs {
                            val negative: DialogInteraction? = null,
                            val neutral: DialogInteraction? = null,
                            val isCancelable: Boolean = true) : SelfCreatedDialogUpdate(dialogId, AlertDialogCreator::class.java)
+
+    data class DatePicker(override val dialogId: DialogId = DialogId.nextId(),
+                          val date: Calendar,
+                          val minDate: Calendar? = null,
+                          val maxDate: Calendar? = null) : SelfCreatedDialogUpdate(dialogId, DatePickerCreator::class.java)
+
+    data class DatePickerResult(val date: Calendar) : DialogResult
 }
 
 open class CommonDialogCreator : DialogCreator {
@@ -80,5 +91,36 @@ class AlertDialogCreator : DialogCreator {
             dialog.onRestoreInstanceState(it)
             dialog
         } ?: dialog
+    }
+}
+
+class DatePickerCreator : DialogCreator {
+    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): Dialog {
+        val dateData = (dialogUpdate as Dialogs.DatePicker)
+        with(dateData) {
+            val onDateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, day ->
+                callback.onResult(dialogId, Dialogs.DatePickerResult(GregorianCalendar(year, month + 1, day)))
+            }
+            val datePicker = DatePickerDialog(
+                    context,
+                    onDateSetListener,
+                    date.get(Calendar.YEAR),
+                    date.get(Calendar.MONTH) - 1,
+                    date.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.setButton(DatePickerDialog.BUTTON_POSITIVE, context.getString(android.R.string.ok), datePicker)
+            datePicker.setOnCancelListener { callback.onCanceledByOutside(dialogId) }
+            minDate?.let {
+                datePicker.datePicker.minDate = it.timeInMillis
+            }
+            maxDate?.let {
+                datePicker.datePicker.maxDate = it.timeInMillis
+            }
+
+            return savedInstanceState?.let {
+                datePicker.onRestoreInstanceState(it)
+                datePicker
+            } ?: datePicker
+        }
     }
 }
