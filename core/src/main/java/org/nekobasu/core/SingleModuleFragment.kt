@@ -53,7 +53,7 @@ open class SingleModuleFragment : Fragment(), BackPressHandling, InterUiContract
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mainUiModule.onSave(outState)
+        if (mainUiModule.isAttached) mainUiModule.onSave(outState)
     }
 
     override fun onBackPress(): Boolean {

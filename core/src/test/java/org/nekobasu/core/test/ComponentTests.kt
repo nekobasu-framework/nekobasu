@@ -13,8 +13,15 @@ import org.robolectric.Robolectric
 import org.robolectric.android.controller.ActivityController
 
 fun GenericScreenStackParam.startVisible(): ActivityController<out FragmentActivity> {
-    val activityController = Robolectric.buildActivity<SingleModuleActivity>(SingleModuleActivity::class.java, SingleModuleActivity.addParamsToActivityIntent(Intent(), this))
+    val activityController = Robolectric.buildActivity<GenericSingleModuleActivity>(GenericSingleModuleActivity::class.java, SingleModuleActivity.addParamsToActivityIntent(Intent(), this))
     return activityController.setup()
+}
+
+class GenericSingleModuleActivity : SingleModuleActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_AppCompat)
+    }
 }
 
 class GenericScreenStackParam(val screenParams: List<Param>) : Param(moduleClass = GenericScreenStackModule::class.java)

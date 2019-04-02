@@ -1,5 +1,6 @@
 package org.nekobasu.core
 
+import org.nekobasu.dialogs.InteractionIds
 import java.util.*
 
 inline class DialogId(val id : Int) {
@@ -41,11 +42,25 @@ interface DialogChannel : Channel {
     fun showDialog(dialogUpdate: DialogUpdateContract, callback: DialogCallback = NoDialogCallback): DialogControl
 }
 
+class DialogCallbacks(
+        private val onRemoved: () -> Unit = {},
+        private val onInteractionPerformed: (interactionId: InteractionId) -> Unit = {},
+        private val onResult: (result: DialogResult) -> Unit = {}
+) : DialogCallback {
+    override fun onDialogRemoved() = onRemoved()
+    override fun onDialogInteractionPerformed(interactionId: InteractionId) = onInteractionPerformed(interactionId)
+    override fun onDialogResult(dialogResult: DialogResult) = onResult(dialogResult)
+}
+
 object NoDialogCallback : DialogCallback {
     override fun onDialogRemoved() {}
     override fun onDialogInteractionPerformed(interactionId: InteractionId) {}
     override fun onDialogResult(dialogResult: DialogResult) {}
 }
+
+fun onOkAction(doOnOkPerformed: () -> Unit) = DialogCallbacks(onInteractionPerformed = { if (it == InteractionIds.POSITIVE) doOnOkPerformed() })
+fun onAnyAction(doOnAnyPerformed: (interactionId: InteractionId) -> Unit) = DialogCallbacks(onInteractionPerformed = { doOnAnyPerformed(it) })
+fun afterDialog(doAfterDialog: () -> Unit) = DialogCallbacks(onInteractionPerformed = { doAfterDialog() }, onResult = { doAfterDialog() }, onRemoved = { doAfterDialog() })
 
 abstract class DialogUpdate(override val dialogId: DialogId) : DialogUpdateContract
 object NoDialog : DialogUpdate(NoDialogId)

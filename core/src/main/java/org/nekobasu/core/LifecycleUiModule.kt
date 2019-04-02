@@ -7,29 +7,32 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.*
 
-abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
+abstract class LifecycleUiModule<T : Any, V, P>(val param: P) :
         UiContract<T, V, P>, InnerViewModelContract,
         BackPressHandling
         where V : ViewModelContract<T>, V : ViewModel {
 
-    fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner, context : Context) {
+    var isAttached = false
+        private set
+
+    open fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner, context: Context) {
         this.context = context
         provider = ViewModelProvider(viewModelStoreOwner, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")
-                return onCreateViewModel(params) as T
+                return onCreateViewModel(param) as T
             }
         })
-
         viewModel.observeViewUpdates(lifecycleOwner, Observer { viewUpdate ->
             onViewUpdate(viewUpdate)
         })
+        isAttached = true
     }
 
     private lateinit var provider: ViewModelProvider
     override lateinit var context: Context
 
-    final override val viewModel: V by lazy { provider.get(getViewModelClass(params)) }
+    final override val viewModel: V by lazy { provider.get(getViewModelClass(param)) }
 
     override fun onCreateViewModel(params: P): V {
         // Default implementation that expects a params only constructor
@@ -42,7 +45,6 @@ abstract class LifecycleUiModule<T : Any, V, P>(val params: P) :
     }
 
     override fun onSave(outBundle: Bundle) {
-        if (::provider.isInitialized)
         viewModel.onSave(outBundle)
     }
 

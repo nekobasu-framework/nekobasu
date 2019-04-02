@@ -18,42 +18,44 @@ import org.nekobasu.core.test.RobolectricTest
 import org.nekobasu.core.test.startVisible
 import org.robolectric.Robolectric
 
-class TestModuleParam(val name: CharSequence) : Param(TestModule::class.java)
-
-class TestViewModel(param: TestModuleParam) : SingleUpdateViewModel<CharSequence>() {
-    override val initialViewUpdate: CharSequence = param.name
-}
-
-const val RES_ID_TEXT_VIEW = 3
-
-class TestModule(param: TestModuleParam) : LifecycleUiModule<CharSequence, TestViewModel, TestModuleParam>(param) {
-    private lateinit var view: View
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        context = inflater.context
-        val parent = LinearLayout(context)
-        parent.id = 2
-        val textView = TextView(context)
-        textView.id = RES_ID_TEXT_VIEW
-        parent.addView(textView)
-
-        return parent
-    }
-
-    override fun onInitView(view: View, savedInstanceState: Bundle?) {
-        this.view = view
-    }
-
-    override lateinit var context: Context
-
-    override fun onViewUpdate(viewUpdate: CharSequence) {
-        view.findViewById<TextView>(3).text = viewUpdate
-    }
-
-    override fun getViewModelClass(params: TestModuleParam) = TestViewModel::class.java
-}
+private val RES_ID_TEXT_VIEW = 3
 
 class ScreenStackComponentTest : RobolectricTest() {
+
+    class TestModuleParam(val name: CharSequence) : Param(TestModule::class.java)
+
+    class TestViewModel(param: TestModuleParam) : SingleUpdateViewModel<CharSequence>() {
+        override val initialViewUpdate: CharSequence = param.name
+    }
+
+
+
+    class TestModule(param: TestModuleParam) : LifecycleUiModule<CharSequence, TestViewModel, TestModuleParam>(param) {
+        private lateinit var view: View
+
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+            context = inflater.context
+            val parent = LinearLayout(context)
+            parent.id = 2
+            val textView = TextView(context)
+            textView.id = RES_ID_TEXT_VIEW
+            parent.addView(textView)
+
+            return parent
+        }
+
+        override fun onInitView(view: View, savedInstanceState: Bundle?) {
+            this.view = view
+        }
+
+        override lateinit var context: Context
+
+        override fun onViewUpdate(viewUpdate: CharSequence) {
+            view.findViewById<TextView>(3).text = viewUpdate
+        }
+
+        override fun getViewModelClass(params: TestModuleParam) = TestViewModel::class.java
+    }
 
     @Test
     fun `test starting a fragment from params initializes and displays fragments ViewModel`() {
@@ -117,5 +119,5 @@ class ScreenStackComponentTest : RobolectricTest() {
         assertThat(activity.isFinishing, equalTo(true))
     }
 
-    // TODO test tasks
+    // TODO test tasks and delivery of values
 }

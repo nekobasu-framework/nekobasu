@@ -106,7 +106,7 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
 
             val interUiContract = fragment as InterUiContract
             interUiContract.deliverResult(RequestedResult(lastRequestForResultId, screenUpdate.result))
-            interUiContract.updateParams(params)
+            interUiContract.updateParams(param)
         }
     }
 

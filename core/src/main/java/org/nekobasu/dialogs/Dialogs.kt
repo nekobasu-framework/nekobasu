@@ -8,8 +8,11 @@ import org.nekobasu.core.*
 import java.lang.IllegalStateException
 
 data class DialogInteraction(val title: CharSequence, val interactionId: InteractionId)
+// TODO add lazy resources
+fun okInteraction() = DialogInteraction("OK", InteractionIds.POSITIVE)
+fun cancelInteraction() = DialogInteraction("Cancel", InteractionIds.NEGATIVE)
 
-class InteractionIds {
+object InteractionIds {
     val POSITIVE = InteractionId(1)
     val NEGATIVE = InteractionId(2)
     val NEUTRAL = InteractionId(3)
@@ -17,7 +20,7 @@ class InteractionIds {
 
 abstract class SelfCreatedDialogUpdate(override val dialogId: DialogId, val dialogCreatorClass: Class<out DialogCreator>) : DialogUpdate(dialogId)
 
-class Dialogs {
+object Dialogs {
 
     data class AlertDialog(override val dialogId: DialogId = DialogId.nextId(),
                            val title: CharSequence,
@@ -48,7 +51,7 @@ open class CommonDialogCreator : DialogCreator {
     }
 }
 
-object AlertDialogCreator : DialogCreator {
+class AlertDialogCreator : DialogCreator {
     override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): Dialog {
         val update = dialogUpdate as Dialogs.AlertDialog
         val dialog = AlertDialog.Builder(context).apply {

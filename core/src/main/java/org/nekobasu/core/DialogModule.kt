@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import org.nekobasu.dialogs.CommonDialogCreator
 
 private const val DIALOG_BUNDLE = "dialog_bundle"
 
@@ -23,7 +25,7 @@ interface DialogCreator {
     fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle? = null, callback: DialogViewCallback): Dialog
 }
 
-class DialogParam(val dialogCreatorClass: Class<DialogCreator>) : Param(DialogModule::class.java)
+class DialogParam(val dialogCreatorClass: Class<out DialogCreator> = CommonDialogCreator::class.java) : Param(DialogModule::class.java)
 
 open class DialogModule(param: DialogParam) : LifecycleUiModule<DialogUpdateContract, DialogViewModel, DialogParam>(param) {
 
@@ -31,7 +33,8 @@ open class DialogModule(param: DialogParam) : LifecycleUiModule<DialogUpdateCont
     private val _dialogCreator: DialogCreator by lazy {
         param.dialogCreatorClass.newInstance()
     }
-    protected val dialogHandler = DialogLifecycleHandler()
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val dialogHandler = DialogLifecycleHandler()
     private var savedInstanceState: Bundle? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
