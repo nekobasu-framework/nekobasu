@@ -16,7 +16,7 @@ open class SingleModuleFragment : Fragment(), BackPressHandling, InterUiContract
     companion object {
         private const val KEY_PARAMS = "fragment_params"
 
-        fun <P : Param> paramsFromFragment(fragment: Fragment): P = fragment.arguments!!.getParcelable(KEY_PARAMS) as P
+        fun <P : Param> paramsFromFragment(fragment: Fragment): P = fragment.arguments!!.getParcelable<P>(KEY_PARAMS) as P
         fun <P : Param> addParamsToFragment(fragment: Fragment, params: P) {
             fragment.arguments = Bundle().apply {
                 putParcelable(KEY_PARAMS, params)

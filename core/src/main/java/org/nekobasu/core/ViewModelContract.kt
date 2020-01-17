@@ -19,7 +19,7 @@ interface ViewModelContract<T : Any> : InnerViewModelContract {
     fun observeViewUpdates(lifecycleOwner: LifecycleOwner? = null, observer : Observer<T>)
     fun removeViewUpdateObserver(observer : Observer<T>)
     fun getViewUpdate() : T
-    fun clear()
+    fun clearViewModel()
 }
 
 interface InnerViewModelContract {

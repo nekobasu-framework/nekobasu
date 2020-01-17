@@ -8,16 +8,16 @@ import org.nekobasu.android.extension.NonnullMediatorLiveData
 
 abstract class SingleUpdateViewModel<T : Any> : ViewModelContract<T>, ViewModel() {
 
-    abstract val initialViewUpdate : T
+    abstract val initialViewUpdate: T
 
-    private val viewUpdateLiveData : NonnullLiveData<T> by lazy {
+    private val viewUpdateLiveData: NonnullLiveData<T> by lazy {
         MutableNonnullLiveData(initialViewUpdate)
     }
 
-    private val viewUpdtaeMediatorLiveData : NonnullMediatorLiveData<T> by lazy {
+    private val viewUpdtaeMediatorLiveData: NonnullMediatorLiveData<T> by lazy {
         NonnullMediatorLiveData(initialViewUpdate).apply {
             addSource(
-                viewUpdateLiveData
+                    viewUpdateLiveData
             ) { viewUpdtaeMediatorLiveData.value = it }
         }
     }
@@ -30,7 +30,7 @@ abstract class SingleUpdateViewModel<T : Any> : ViewModelContract<T>, ViewModel(
         viewUpdtaeMediatorLiveData.removeSource(toRemote)
     }
 
-    protected fun setViewUpdate(viewUpdate : T) {
+    protected fun setViewUpdate(viewUpdate: T) {
         (viewUpdateLiveData as MutableNonnullLiveData).value = viewUpdate
     }
 
@@ -46,10 +46,10 @@ abstract class SingleUpdateViewModel<T : Any> : ViewModelContract<T>, ViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        clear()
+        clearViewModel()
     }
 
-    override fun clear() {}
+    override fun clearViewModel() {}
 
     override fun deliverResult(result: RequestedResult) {}
 

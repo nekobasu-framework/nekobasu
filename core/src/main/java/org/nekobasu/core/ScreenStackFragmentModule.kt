@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -22,6 +23,7 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
     private var oldScreenUpdateStack: List<ScreenUpdate> = emptyList()
     private val taskTagsCache: MutableSet<String> = mutableSetOf()
 
+    @CallSuper
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         fragmentManager = acticityContext.supportFragmentManager
         return null

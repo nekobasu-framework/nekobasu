@@ -61,7 +61,7 @@ class ExampleViewModel : SingleUpdateViewModel<ExampleViewUpdate>() {
 
     var counter: Int = 0
 
-    override fun clear() {
+    override fun clearViewModel() {
         try {
             thread.interrupt()
         } catch (e: Throwable) {

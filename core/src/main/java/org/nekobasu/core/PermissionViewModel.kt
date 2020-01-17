@@ -10,7 +10,7 @@ import org.nekobasu.core.PermissionChannel.PermissionRequestState
 import org.nekobasu.core.PermissionChannel.PermissionRequestState.COMPLETED
 import org.nekobasu.core.PermissionChannel.PermissionRequestState.RUNNING
 import org.nekobasu.core.PermissionChannel.PermissionState.*
-import org.nekobasu.dialogs.InteractionIds
+import java.lang.IllegalStateException
 
 sealed class SystemRequest
 object NoRequest : SystemRequest()
@@ -22,11 +22,10 @@ interface PermissionChecker {
     fun isPermissionGranted(permission: Permission): Boolean
 }
 
-class PermissionRequestLiveData(permissions: List<Permission>, permissionChecker: PermissionChecker) : NonnullLiveData<PermissionChannel.PermissionRequest>(PermissionChannel.PermissionRequest(
-        permissionStates = createPermissionStates(permissions, permissionChecker),
+class PermissionRequestLiveData(permissionStates : Map<Permission, PermissionChannel.PermissionState>) : NonnullLiveData<PermissionChannel.PermissionRequest>(PermissionChannel.PermissionRequest(
+        permissionStates = permissionStates,
         state = RUNNING
 )) {
-
     fun completedPermission(permission: Permission, state: PermissionChannel.PermissionState): PermissionRequestState {
         val map = value.permissionStates.toMutableMap().apply {
             put(permission, state)
@@ -37,7 +36,24 @@ class PermissionRequestLiveData(permissions: List<Permission>, permissionChecker
     }
 
     private fun computeState(permissionStates: Map<Permission, PermissionChannel.PermissionState>) =
-            if (value.permissionStates.all { it.value != UNKNOWN }) COMPLETED else RUNNING
+            if (permissionStates.all { it.value != UNKNOWN }) COMPLETED else RUNNING
+
+    fun unknownPermissions(): List<Permission> = value.permissionStates.filter { it.value == UNKNOWN }.map { it.key }
+
+    fun recheckPermissions(permissionChecker: PermissionChecker) {
+        if (value.state == RUNNING) {
+            val newStates = value.permissionStates.map {
+                val isGranted = permissionChecker.isPermissionGranted(it.key)
+                val permissionState = it.value
+                when  {
+                    isGranted -> it.key to GRANTED
+                    !isGranted && permissionState == GRANTED -> it.key to REJECTED
+                    else -> it.key to it.value
+                }
+            }.toMap()
+            value = PermissionChannel.PermissionRequest(newStates, computeState(newStates))
+        }
+    }
 
     init {
         val state = computeState(value.permissionStates)
@@ -56,7 +72,7 @@ fun createPermissionStates(permissions: List<Permission>, permissionChecker: Per
 private typealias Callback = (Permission, PermissionChannel.PermissionState) -> PermissionRequestState
 
 
-open class PermissionViewModel(private val permissionChecker: PermissionChecker) : SingleUpdateViewModel<SystemRequest>(), PermissionChannel, DialogCallbackTarget, LifecycleObserver {
+open class PermissionViewModel(private val permissionChecker: PermissionChecker) : SingleUpdateViewModel<SystemRequest>(), PermissionChannel, LifecycleObserver {
 
     companion object {
         const val PERMISSIONS_REQUEST_CODE = 1000
@@ -64,93 +80,52 @@ open class PermissionViewModel(private val permissionChecker: PermissionChecker)
 
     override val initialViewUpdate: SystemRequest = NoRequest
 
-    private data class PermissionRequest(val permissions: List<Permission>, val liveData:)
+    private data class PermissionRequest(val permissions: List<Permission>, val liveData: PermissionRequestLiveData)
 
     private val requests = mutableListOf<PermissionRequest>()
 
 
     override fun needPermission(vararg permissions: Permission): NonnullLiveData<PermissionChannel.PermissionRequest> {
-        val liveData = PermissionRequestLiveData(permissions.toList(), permissionChecker)
+        val liveData = PermissionRequestLiveData(createPermissionStates(permissions.toList(), permissionChecker))
         if (liveData.value.state != COMPLETED) {
-            requestPermission(permissions.toList()) { permission, state ->
-                liveData.completedPermission(permission, state)
-            }
+            requestPermission(permissions.toList(), liveData)
         }
         return liveData
     }
 
-    private fun requestPermission(permissions: List<Permission>, callback: Callback) {
-        requests.add(PermissionRequest(permissions, callback))
-        val allPermissions = requests.flatMap { it.permissions }.map { it.systemName }.toSet()
+    private fun requestPermission(permissions: List<Permission>, liveData: PermissionRequestLiveData) {
+        requests.add(PermissionRequest(permissions, liveData))
+        val allPermissions = requests.flatMap { it.liveData.unknownPermissions() }.map { it.systemName }.toSet()
         setViewUpdate(RequestPermissions(allPermissions, PERMISSIONS_REQUEST_CODE))
     }
 
-    // TODO
-//    override fun cancelRequest(call: PermissionChannel.Callback) {
-//        requests.removeAll { it.callback == call }
-//        setViewUpdate(NoRequest)
-//    }
 
     fun onPermissionRequestResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray, shouldShowRationalResults: List<Boolean>) {
+
         if (permissions.isEmpty() || requestCode != PERMISSIONS_REQUEST_CODE) {
             // No permission was answered so ignore this request
             return
         }
 
-        val permanentDeniedPermissions = permissions.filterIndexed { index, _ ->
-            grantResults[index] == PackageManager.PERMISSION_DENIED && !shouldShowRationalResults[index]
-        }
-
-
-        setViewUpdate(NoRequest)
-        // Is any permission not accepted?
-        if (grantResults.any { it != PackageManager.PERMISSION_GRANTED }) {
-            val permanentDeniedPermissions = permissions.filterIndexed { index, _ ->
-                grantResults[index] == PackageManager.PERMISSION_DENIED && !shouldShowRationalResults[index]
+        permissions.forEachIndexed { index, permissionString ->
+            val result = grantResults[index]
+            val newState = when {
+                result == PackageManager.PERMISSION_DENIED && !shouldShowRationalResults[index] -> PERMANENT_REJECTED
+                result == PackageManager.PERMISSION_DENIED -> REJECTED
+                result == PackageManager.PERMISSION_GRANTED -> GRANTED
+                else -> throw IllegalStateException("Permission ($permissionString) request returned with unknown state: $result")
             }
-            // Did the user permanently denied any permission
-            if (permanentDeniedPermissions.isEmpty()) {
-                // We can still prompt the user without the settings dialog so just fail here
-                requests.forEach {
-                    it.callback.onFailure()
-                }
-                requests.clear()
-            } else {
-                // Tell the user that we need that permissions
 
-                // Create a new request Id to keep track of this new UI interaction
-                val overlayCallbackId = createRequestId()
-                val permission = Permission.values().first {
-                    it.systemName == permanentDeniedPermissions.first()
-                }
-                setViewUpdate(createPermissionDialog(overlayCallbackId, permission))
-
-            }
-        } else {
             requests.forEach {
-                it.callback.onSuccess()
+                val permission = Permission(permissionString)
+                if (it.permissions.contains(permission)) {
+                    it.liveData.completedPermission(permission, newState)
+                }
             }
-            requests.clear()
         }
+
+        computeNewState()
     }
-
-    abstract fun createPermissionDialog(overlayCallbackId: Int, permission: Permission): RequestDialog
-
-    override fun onDialogRemoved(dialogId: DialogId) {
-        onCancelPermanentDenied()
-        setViewUpdate(NoRequest)
-    }
-
-    override fun onDialogInteractionPerformed(dialogId: DialogId, interactionId: InteractionId) {
-        setViewUpdate(NoRequest)
-        if (interactionId == InteractionIds.NEGATIVE) {
-            onCancelPermanentDenied()
-        } else {
-            openSettings(dialogId)
-        }
-    }
-
-    override fun onDialogResult(dialogId: DialogId, dialogResult: DialogResult) {}
 
     // Coming back from the settings should call onStart
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -164,49 +139,24 @@ open class PermissionViewModel(private val permissionChecker: PermissionChecker)
         onReturningFromSettings()
     }
 
-    private fun createRequestId() = (Math.random() * 10000).toInt()
-
-    private fun onCancelPermanentDenied() {
-        requests.forEach {
-            it.callback.onFailure()
-        }
-        requests.clear()
-        setViewUpdate(NoRequest)
-    }
-
     private fun openSettings(callbackId: DialogId) {
         setViewUpdate(OpenApplicationSettings(callbackId.id))
     }
 
     private fun onReturningFromSettings() {
-        val viewDataValue = getViewUpdate()
-        when (viewDataValue) {
-            is OpenApplicationSettings -> {
-                // We open the Settings lets finish the flow
-                setViewUpdate(NoRequest)
-                requests.forEach {
-                    if (missingPermissions(it.permissions).isEmpty()) {
-                        it.callback.onSuccess()
-                    } else {
-                        it.callback.onFailure()
-                    }
-                }
-                requests.clear()
-            }
-            is RequestDialog -> {
-                // We just went away from the dialog lets check again, bu do not fail in case it is not granted
-                val iterator = requests.iterator()
-                var hasCompleted = false
-                while (iterator.hasNext()) {
-                    val request = iterator.next()
-                    if (missingPermissions(request.permissions).isEmpty()) {
-                        iterator.remove()
-                        request.callback.onSuccess()
-                        hasCompleted = true
-                    }
-                }
-                if (hasCompleted) setViewUpdate(NoRequest)
-            }
+        requests.forEach { it.liveData.recheckPermissions(permissionChecker) }
+        computeNewState()
+    }
+
+    private fun computeNewState() {
+        val deleteRequests = requests.filter { it.liveData.value.state == COMPLETED }
+        requests.removeAll(deleteRequests)
+
+        val allPermissions = requests.flatMap { it.liveData.unknownPermissions() }.map { it.systemName }.toSet()
+        if (allPermissions.isEmpty()) {
+            setViewUpdate(NoRequest)
+        } else {
+            setViewUpdate(RequestPermissions(allPermissions, PERMISSIONS_REQUEST_CODE))
         }
     }
 
@@ -216,8 +166,9 @@ open class PermissionViewModel(private val permissionChecker: PermissionChecker)
 
 data class Permission(val systemName: String) {
     companion object {
-        val LOCATION = Permission(Manifest.permission.ACCESS_FINE_LOCATION),
-        val READ_CONTACTS = Permission(Manifest.permission.READ_CONTACTS),
+        // TODO complete this list
+        val LOCATION = Permission(Manifest.permission.ACCESS_FINE_LOCATION)
+        val READ_CONTACTS = Permission(Manifest.permission.READ_CONTACTS)
         val WRITE_EXTERNAL_STORAGE = Permission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 }
