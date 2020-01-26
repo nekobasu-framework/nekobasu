@@ -1,10 +1,11 @@
 package org.nekobasu.core
 
 import android.os.Bundle
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
-class RequestForResultParam(moduleClass: Class<out LifecycleUiModule<*, *, *>>,
+abstract class RequestForResultParam(moduleClass: Class<out LifecycleUiModule<*, *, *>>,
                             val requestForResultId: Int) : Param(moduleClass)
 
 // TODO create wrapping DSL to simplify updates

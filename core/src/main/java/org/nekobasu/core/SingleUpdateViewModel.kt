@@ -51,7 +51,9 @@ abstract class SingleUpdateViewModel<T : Any> : ViewModelContract<T>, ViewModel(
 
     override fun clearViewModel() {}
 
-    override fun deliverResult(result: RequestedResult) {}
+    override fun deliverResult(result: RequestedResult) : Boolean {
+        return false
+    }
 
     override fun onSave(outBundle: Bundle) {}
 

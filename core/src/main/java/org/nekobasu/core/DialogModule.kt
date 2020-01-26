@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import kotlinx.android.parcel.Parcelize
 import org.nekobasu.dialogs.CommonDialogCreator
 
 private const val DIALOG_BUNDLE = "dialog_bundle"
@@ -25,6 +26,7 @@ interface DialogCreator {
     fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle? = null, callback: DialogViewCallback): Dialog
 }
 
+@Parcelize
 class DialogParam(val dialogCreatorClass: Class<out DialogCreator> = CommonDialogCreator::class.java) : Param(DialogModule::class.java)
 
 open class DialogModule(param: DialogParam = DialogParam()) : LifecycleUiModule<DialogUpdateContract, DialogViewModel, DialogParam>(param) {

@@ -23,7 +23,10 @@ interface ViewModelContract<T : Any> : InnerViewModelContract {
 }
 
 interface InnerViewModelContract {
-    fun deliverResult(result : RequestedResult)
+    /**
+     * Return true if consumed
+     */
+    fun deliverResult(result : RequestedResult) : Boolean
     fun onSave(outBundle : Bundle)
     fun onRestore(inBundle : Bundle)
 }

@@ -54,8 +54,8 @@ abstract class LifecycleUiModule<T : Any, V, P>(val param: P) :
 
     abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     abstract fun onInitView(view: View, savedInstanceState: Bundle?)
-    override fun deliverResult(result: RequestedResult) {
-        viewModel.deliverResult(result)
+    override fun deliverResult(result: RequestedResult) : Boolean {
+        return viewModel.deliverResult(result)
     }
 }
 

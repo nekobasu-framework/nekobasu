@@ -9,8 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import kotlinx.android.parcel.Parcelize
 
-@Parcelize
-open class Param(val moduleClass: Class<out LifecycleUiModule<*,*,*>>) : Parcelable
+abstract class Param(val moduleClass: Class<out LifecycleUiModule<*,*,*>>) : Parcelable
 
 open class SingleModuleFragment : Fragment(), BackPressHandling, InterUiContract {
     companion object {

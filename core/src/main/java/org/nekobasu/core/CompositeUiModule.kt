@@ -51,9 +51,14 @@ abstract class CompositeUiModule<T : Any, V, P>(param: P) : LifecycleUiModule<T,
     }
 
     @CallSuper
-    override fun deliverResult(result: RequestedResult) {
-        // TODO need to find a way how to route it to sub modules
-        supportModules.forEach { it.deliverResult(result) }
-        viewModel.deliverResult(result)
+    override fun deliverResult(result: RequestedResult) : Boolean {
+        if (viewModel.deliverResult(result)) {
+            return true
+        } else {
+            supportModules.forEach {
+                if (it.deliverResult(result)) return true
+            }
+            return false
+        }
     }
 }

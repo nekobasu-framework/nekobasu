@@ -128,4 +128,17 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
         }
         return true
     }
+
+    override fun deliverResult(result: RequestedResult) : Boolean {
+        if (!super.deliverResult(result)) {
+            fragmentManager.fragments.forEach {
+                if (it is InnerViewModelContract && it.deliverResult(result)) {
+                    return true
+                }
+            }
+            return false
+        } else {
+            return false
+        }
+    }
 }

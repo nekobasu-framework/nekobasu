@@ -107,7 +107,6 @@ fun lazyString(contextToString: (Context) -> String) = FunctionString(contextToS
 fun lazyString(vararg strings: CharSequence, separator: CharSequence = "") = ConcatenatedString(*strings, separator = separator)
 fun lazyString(@StringRes stringRes: Int) = ResString(stringRes)
 fun lazyString(@StringRes stringRes: Int, vararg params: Any) = FormattedString(stringRes, *params)
-fun lazyWarningString(@StringRes stringRes: Int) = WarningString(ResString(stringRes))
 
 private fun resolveCharSequence(context: Context): (Any) -> Any =
         { (it as? ContextString)?.resolve(context) ?: it }
