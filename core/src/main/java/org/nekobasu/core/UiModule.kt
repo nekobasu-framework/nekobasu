@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.lifecycle.*
 
-abstract class LifecycleUiModule<T : Any, V, P>(val param: P) :
+abstract class UiModule<T : Any, V, P>(val param: P) :
         UiContract<T, V, P>, InnerViewModelContract,
         BackPressHandling
         where V : ViewModelContract<T>, V : ViewModel {
@@ -54,8 +55,10 @@ abstract class LifecycleUiModule<T : Any, V, P>(val param: P) :
 
     abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     abstract fun onInitView(view: View, savedInstanceState: Bundle?)
-    override fun deliverResult(result: RequestedResult) : Boolean {
+    override fun deliverResult(result: RequestedResult): Boolean {
         return viewModel.deliverResult(result)
     }
+
 }
 
+fun UiModule<*, *, *>.string(@StringRes stringResId: Int): CharSequence = context.getString(stringResId)

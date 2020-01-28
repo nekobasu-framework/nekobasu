@@ -17,6 +17,6 @@ interface UiContract<T : Any, V, P> where V : ViewModelContract<T>, V : ViewMode
 data class RequestedResult(val requestId : Int, val result: Result)
 
 interface InterUiContract {
-    fun deliverResult(result : RequestedResult)
+    fun deliverResult(result : RequestedResult) : Boolean
     fun updateParams(param: Parcelable)
 }

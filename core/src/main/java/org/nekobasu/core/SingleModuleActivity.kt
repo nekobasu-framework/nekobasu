@@ -30,7 +30,7 @@ open class SingleModuleActivity : FragmentActivity() {
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    val mainUiModule: LifecycleUiModule<*, *, *> by lazy {
+    val m_mainUiModule: UiModule<*, *, *> by lazy {
         val intentParam = paramsFromActivity<Param>(this)
         val initialParam = getInitialParam()
 
@@ -45,21 +45,26 @@ open class SingleModuleActivity : FragmentActivity() {
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainUiModule.attach(this, this, this)
-        savedInstanceState?.let { mainUiModule.onRestore(savedInstanceState) }
-        val view = mainUiModule.onCreateView(LayoutInflater.from(this), null, savedInstanceState)
+        m_mainUiModule.attach(this, this, this)
+        savedInstanceState?.let { m_mainUiModule.onRestore(savedInstanceState) }
+        val view = m_mainUiModule.onCreateView(LayoutInflater.from(this), null, savedInstanceState)
         setContentView(view)
         if (view != null) {
-            mainUiModule.onInitView(view, savedInstanceState)
+            m_mainUiModule.onInitView(view, savedInstanceState)
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mainUiModule.onSave(outState)
+        m_mainUiModule.onSave(outState)
     }
 
     override fun onBackPressed() {
-        mainUiModule.onBackPress()
+        m_mainUiModule.onBackPress()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        m_mainUiModule.deliverResult(RequestedResult(requestCode, OnActivityResult(requestCode, resultCode, data)))
     }
 }

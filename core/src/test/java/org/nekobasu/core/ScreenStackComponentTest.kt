@@ -10,7 +10,6 @@ import android.widget.TextView
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.isA
-import com.natpryce.hamkrest.isEmpty
 import org.junit.Test
 import org.nekobasu.core.test.GenericScreenStackParam
 
@@ -30,7 +29,7 @@ class ScreenStackComponentTest : RobolectricTest() {
 
 
 
-    class TestModule(param: TestModuleParam) : LifecycleUiModule<CharSequence, TestViewModel, TestModuleParam>(param) {
+    class TestModule(param: TestModuleParam) : UiModule<CharSequence, TestViewModel, TestModuleParam>(param) {
         private lateinit var view: View
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -63,7 +62,7 @@ class ScreenStackComponentTest : RobolectricTest() {
 
         val fragment = controller.get().supportFragmentManager.fragments.first() as SingleModuleFragment
 
-        assertThat(fragment.mainUiModule.viewModel, isA<TestViewModel>())
+        assertThat(fragment.m_mainUiModule.viewModel, isA<TestViewModel>())
         assertThat(fragment.view!!.findViewById<TextView>(RES_ID_TEXT_VIEW).text.toString(), equalTo("firstModule"))
     }
 

@@ -10,12 +10,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 
-abstract class CompositeUiModule<T : Any, V, P>(param: P) : LifecycleUiModule<T, V, P>(param)
+abstract class CompositeUiModule<T : Any, V, P>(param: P) : UiModule<T, V, P>(param)
         where V : ViewModelContract<T>, V : ViewModel {
 
-    abstract val supportModules: Set<LifecycleUiModule<*, *, *>>
+    abstract val supportModules: Set<UiModule<*, *, *>>
 
-    private val supportModuleViews = mutableMapOf<LifecycleUiModule<*, *, *>, View?>()
+    private val supportModuleViews = mutableMapOf<UiModule<*, *, *>, View?>()
 
     @CallSuper
     override fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner, context: Context) {
@@ -41,7 +41,7 @@ abstract class CompositeUiModule<T : Any, V, P>(param: P) : LifecycleUiModule<T,
         return onCreateView(inflater, container, savedInstanceState, supportModuleViews)
     }
 
-    abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?, moduleViews: Map<LifecycleUiModule<*, *, *>, View?>): View?
+    abstract fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?, moduleViews: Map<UiModule<*, *, *>, View?>): View?
 
     @CallSuper
     override fun onInitView(view: View, savedInstanceState: Bundle?) {

@@ -16,7 +16,7 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
         private val fragmentCreator: (ScreenUpdate) -> Fragment = {
             UiModules.fragmentFromModule(it.params)
         }
-) : LifecycleUiModule<List<ScreenUpdate>, V, P>(param) {
+) : UiModule<List<ScreenUpdate>, V, P>(param) {
 
     private val acticityContext: FragmentActivity by lazy { context as FragmentActivity }
     private lateinit var fragmentManager: FragmentManager
@@ -132,7 +132,7 @@ abstract class ScreenStackFragmentModule<V : ScreenStackViewModel, P : Param>(
     override fun deliverResult(result: RequestedResult) : Boolean {
         if (!super.deliverResult(result)) {
             fragmentManager.fragments.forEach {
-                if (it is InnerViewModelContract && it.deliverResult(result)) {
+                if (it is InterUiContract && it.deliverResult(result)) {
                     return true
                 }
             }

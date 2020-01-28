@@ -1,5 +1,6 @@
 package org.nekobasu.core
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.lifecycle.Lifecycle
@@ -7,7 +8,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import kotlinx.android.parcel.Parcelize
 
-// TODO external intent results and internal framework results
+class OnActivityResult(val requestCode: Int, val resultCode: Int, oldIntent: Intent?) : Intent(oldIntent), Result
+
 interface Result: Parcelable
 
 @Parcelize

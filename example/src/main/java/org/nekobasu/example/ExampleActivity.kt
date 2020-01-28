@@ -7,7 +7,6 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentActivity
 import kotlinx.android.synthetic.main.fragment_example.view.*
 import org.nekobasu.core.*
 
@@ -80,7 +79,7 @@ class ExampleViewModel : SingleUpdateViewModel<ExampleViewUpdate>() {
     }
 }
 
-class ExampleModule : LifecycleUiModule<ExampleViewUpdate, ExampleViewModel, ExampleScreenParams>(ExampleScreenParams()) {
+class ExampleModule : UiModule<ExampleViewUpdate, ExampleViewModel, ExampleScreenParams>(ExampleScreenParams()) {
     override lateinit var context: Context
     lateinit var view: View
 

@@ -29,7 +29,7 @@ interface DialogCreator {
 @Parcelize
 class DialogParam(val dialogCreatorClass: Class<out DialogCreator> = CommonDialogCreator::class.java) : Param(DialogModule::class.java)
 
-open class DialogModule(param: DialogParam = DialogParam()) : LifecycleUiModule<DialogUpdateContract, DialogViewModel, DialogParam>(param) {
+open class DialogModule(param: DialogParam = DialogParam()) : UiModule<DialogUpdateContract, DialogViewModel, DialogParam>(param) {
 
     override lateinit var context: Context
     private val _dialogCreator: DialogCreator by lazy {

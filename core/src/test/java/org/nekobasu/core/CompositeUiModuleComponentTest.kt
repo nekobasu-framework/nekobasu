@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.natpryce.hamkrest.*
 import com.natpryce.hamkrest.assertion.assertThat
-import com.nhaarman.mockito_kotlin.isNotNull
 import org.junit.Test
 import org.nekobasu.core.test.GenericScreenStackParam
 
@@ -17,7 +16,6 @@ import org.nekobasu.core.test.RobolectricTest
 import org.nekobasu.core.test.startVisible
 import org.nekobasu.dialogs.Dialogs
 import org.nekobasu.dialogs.okInteraction
-import org.robolectric.Robolectric
 
 private const val RES_ID_TEXT_VIEW = 3
 
@@ -41,11 +39,11 @@ class CompositeUiModuleComponentTest : RobolectricTest() {
 
         val dialogModule = DialogModule(DialogParam())
 
-        override val supportModules: Set<LifecycleUiModule<*, *, *>> = setOf(
+        val m_supportModules: Set<UiModule<*, *, *>> = setOf(
                 dialogModule
         )
 
-        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?, moduleViews: Map<LifecycleUiModule<*, *, *>, View?>): View? {
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?, moduleViews: Map<UiModule<*, *, *>, View?>): View? {
             context = inflater.context
             val parent = LinearLayout(context)
             parent.id = 2
@@ -81,7 +79,7 @@ class CompositeUiModuleComponentTest : RobolectricTest() {
 
         val fragment = controller.get().supportFragmentManager.fragments.first() as SingleModuleFragment
 
-        val dialogModule = (fragment.mainUiModule as TestModule).dialogModule
+        val dialogModule = (fragment.m_mainUiModule as TestModule).dialogModule
         assertThat(dialogModule.dialogHandler.dialog, present())
     }
 
@@ -89,7 +87,7 @@ class CompositeUiModuleComponentTest : RobolectricTest() {
     fun `test canceling a visible dialog removes the dialog`() {
         val controller = GenericScreenStackParam(listOf(TestModuleParam("firstModule"))).startVisible()
         val fragment = controller.get().supportFragmentManager.fragments.first() as SingleModuleFragment
-        val module = (fragment.mainUiModule as TestModule)
+        val module = (fragment.m_mainUiModule as TestModule)
 
         module.viewModel.dialogCallback.cancel()
 
