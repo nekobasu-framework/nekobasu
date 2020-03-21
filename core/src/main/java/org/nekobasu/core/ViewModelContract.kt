@@ -8,7 +8,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import kotlinx.android.parcel.Parcelize
 
-class OnActivityResult(val requestCode: Int, val resultCode: Int, oldIntent: Intent?) : Intent(oldIntent), Result
+@Parcelize
+class OnActivityResult(val requestCode: Int, val resultCode: Int, val oldIntent: Intent?) : Result
 
 interface Result: Parcelable
 

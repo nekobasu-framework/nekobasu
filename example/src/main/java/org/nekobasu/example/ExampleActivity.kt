@@ -7,9 +7,11 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_example.view.*
 import org.nekobasu.core.*
 
+@Parcelize
 class MainParams : Param(MainUiModule::class.java)
 
 class MainViewModel : ScreenStackViewModel() {
@@ -32,6 +34,8 @@ class ExampleActivity : SingleModuleActivity() {
         return MainParams()
     }
 }
+
+@Parcelize
 class ExampleScreenParams : Param(ExampleModule::class.java)
 
 // TODO add lazy recource extension

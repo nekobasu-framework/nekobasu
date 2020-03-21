@@ -22,8 +22,18 @@ interface DialogViewCallback {
     fun onResult(dialogId: DialogId, dialogResult: DialogResult)
 }
 
+interface ShowableWidget {
+    fun show()
+}
+
+class ShowableDialogWidget(val dialog : Dialog) : ShowableWidget {
+    override fun show() {
+        dialog.show()
+    }
+}
+
 interface DialogCreator {
-    fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle? = null, callback: DialogViewCallback): Dialog
+    fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle? = null, callback: DialogViewCallback): ShowableWidget
 }
 
 @Parcelize
@@ -63,7 +73,7 @@ open class DialogModule(param: DialogParam = DialogParam()) : UiModule<DialogUpd
     private fun showDialog(dialogUpdate: DialogUpdateContract) {
         val savedDialogBundle = savedInstanceState?.getBundle(DIALOG_BUNDLE)
 
-        val dialog = getDialogCreator().createDialog(context, dialogUpdate, savedDialogBundle, object : DialogViewCallback {
+        val widget = getDialogCreator().createDialog(context, dialogUpdate, savedDialogBundle, object : DialogViewCallback {
             override fun onResult(dialogId: DialogId, dialogResult: DialogResult) {
                 dialogHandler.reset()
                 viewModel.onDialogResult(dialogId, dialogResult)
@@ -79,8 +89,10 @@ open class DialogModule(param: DialogParam = DialogParam()) : UiModule<DialogUpd
                 viewModel.onDialogInteractionPerformed(dialogId, interactionId)
             }
         })
-        dialogHandler.register(dialog)
-        dialog.show()
+        if (widget is ShowableDialogWidget) {
+            dialogHandler.register(widget.dialog)
+        }
+        widget.show()
         if (savedDialogBundle != null) {
             // Discard the already shown state
             savedInstanceState?.remove(DIALOG_BUNDLE)

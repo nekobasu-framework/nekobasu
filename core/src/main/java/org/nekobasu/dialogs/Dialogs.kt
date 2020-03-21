@@ -6,15 +6,14 @@ import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import org.nekobasu.core.*
+import org.nekobasu.resources.lazyString
 import java.lang.IllegalStateException
 import java.util.*
 
 data class DialogInteraction(val title: CharSequence, val interactionId: InteractionId)
 
-// TODO add lazy resources
-fun okInteraction() = DialogInteraction("OK", InteractionIds.POSITIVE)
-
-fun cancelInteraction() = DialogInteraction("Cancel", InteractionIds.NEGATIVE)
+fun okInteraction() = DialogInteraction(lazyString(android.R.string.ok), InteractionIds.POSITIVE)
+fun cancelInteraction() = DialogInteraction(lazyString(android.R.string.cancel), InteractionIds.NEGATIVE)
 
 object InteractionIds {
     val POSITIVE = InteractionId(1)
@@ -46,7 +45,7 @@ open class CommonDialogCreator : DialogCreator {
 
     private val dialogCreatorCache = mutableMapOf<Class<*>, DialogCreator>()
 
-    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): Dialog {
+    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): ShowableWidget {
         val creator = when (dialogUpdate) {
             is SelfCreatedDialogUpdate -> {
                 val creator = dialogCreatorCache[dialogUpdate.dialogCreatorClass]
@@ -63,7 +62,7 @@ open class CommonDialogCreator : DialogCreator {
 }
 
 class AlertDialogCreator : DialogCreator {
-    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): Dialog {
+    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): ShowableWidget {
         val update = dialogUpdate as Dialogs.AlertDialog
         val dialog = AlertDialog.Builder(context).apply {
             setTitle(update.title)
@@ -87,15 +86,15 @@ class AlertDialogCreator : DialogCreator {
             setCancelable(update.isCancelable)
         }.create()
 
-        return savedInstanceState?.let {
+        return ShowableDialogWidget(savedInstanceState?.let {
             dialog.onRestoreInstanceState(it)
             dialog
-        } ?: dialog
+        } ?: dialog)
     }
 }
 
 class DatePickerCreator : DialogCreator {
-    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): Dialog {
+    override fun createDialog(context: Context, dialogUpdate: DialogUpdateContract, savedInstanceState: Bundle?, callback: DialogViewCallback): ShowableWidget {
         val dateData = (dialogUpdate as Dialogs.DatePicker)
         with(dateData) {
             val onDateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, day ->
@@ -117,10 +116,10 @@ class DatePickerCreator : DialogCreator {
                 datePicker.datePicker.maxDate = it.timeInMillis
             }
 
-            return savedInstanceState?.let {
+            return ShowableDialogWidget(savedInstanceState?.let {
                 datePicker.onRestoreInstanceState(it)
                 datePicker
-            } ?: datePicker
+            } ?: datePicker)
         }
     }
 }
