@@ -16,7 +16,7 @@ abstract class UiModule<T : Any, V, P>(val param: P) :
     var isAttached = false
         private set
 
-    open fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner, context: Context) {
+    open fun attach(lifecycleOwner: LifecycleOwner?, viewModelStoreOwner: ViewModelStoreOwner, context: Context) {
         this.context = context
         provider = ViewModelProvider(viewModelStoreOwner, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {

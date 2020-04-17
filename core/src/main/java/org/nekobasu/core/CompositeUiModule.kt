@@ -18,7 +18,7 @@ abstract class CompositeUiModule<T : Any, V, P>(param: P) : UiModule<T, V, P>(pa
     private val supportModuleViews = mutableMapOf<UiModule<*, *, *>, View?>()
 
     @CallSuper
-    override fun attach(lifecycleOwner: LifecycleOwner, viewModelStoreOwner: ViewModelStoreOwner, context: Context) {
+    override fun attach(lifecycleOwner: LifecycleOwner?, viewModelStoreOwner: ViewModelStoreOwner, context: Context) {
         supportModules.forEach { it.attach(lifecycleOwner, viewModelStoreOwner, context) }
         super.attach(lifecycleOwner, viewModelStoreOwner, context)
     }
