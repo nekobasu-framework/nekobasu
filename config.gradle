@@ -6,7 +6,7 @@ ext {
 
     libraries = [
             // Android
-            architecture: '2.0.0',
+            architecture: '2.1.0',
             constraint  : '1.1.2',
             appCompat   : '1.1.0',
             transition  : '1.0.1',
