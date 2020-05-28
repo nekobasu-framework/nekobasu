@@ -82,7 +82,7 @@ install {
                     developer {
                         id 'joecks'
                         name 'Simon Joecks'
-                        email 'simon.joecks@gmail.com'
+                        email 'joecks@halfreal.de'
                     }
                 }
                 scm {
